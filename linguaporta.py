@@ -60,13 +60,13 @@ while True:
     if title_content == '多肢選択':
         tableName = f'Q{title_number}1'
         flag = 1
-    elif title_content == '単一選択':
+    elif title_content == '空所補充':
         tableName = f'Q{title_number}2'
         flag = 2
     elif title_content == '記述問題':
         tableName = f'Q{title_number}3'
         flag = 3
-    elif title_content == '記述問題':
+    elif title_content == 'ディクテーション':
         tableName = f'Q{title_number}4'
         flag = 4
 
@@ -82,6 +82,72 @@ while True:
 
     values = []
     questions = []
+
+    # 空所補充
+    while flag == 2:
+        sleep(1)
+
+        elem_question = browser.find_element(By.XPATH,'//*[@id="question_td"]/form[1]/b')
+        question_ = int(elem_question.text.split('：')[1])
+        cur.execute(f'select * from {tableName} where question == {question_};')
+        print(cur.fetchall())   
+        
+        cur.execute(f'select * from {tableName} where question == {question_};')
+        if len(cur.fetchall())==0:
+            elem_box = browser.find_element(By.ID,'tabindex1')
+            elem_box.send_keys("a")
+
+            elem_push = browser.find_element(By.ID,'ans_submit')
+            elem_push.click()
+
+            sleep(1)
+            try:
+                sleep(1)
+                elem_ans_btn = browser.find_element(By.XPATH,'//input[@value=\'正解を見る\']')
+                browser.execute_script('arguments[0].click();', elem_ans_btn)
+            except:
+                print("no answer")
+
+            elem_box = browser.find_element(By.XPATH,'//*[@id="question_area"]/div[3]/input')
+            value = elem_box.get_attribute('value')
+            values.append(value)
+
+            elem_question = browser.find_element(By.XPATH,'//*[@id="question_td"]/form[1]/b')
+            question = int(elem_question.text.split('：')[1])
+            questions.append(question)
+
+            # print(type(question))
+            # print(type(value))
+
+            cur.execute(f'INSERT INTO {tableName}(question , ans) values( {question} , \'{value}\' )')
+
+            # print(values)
+            # print(questions)
+            # 中身を全て取得するfetchall()を使って、printする。
+            cur.execute(f'SELECT * FROM {tableName}')
+            print(cur.fetchall())   
+        else:
+            cur.execute(f'select * from {tableName} where question == {question_};')
+            ansCheck = cur.fetchall()[0][1]
+
+            elem_box = browser.find_element(By.ID,'tabindex1')
+            elem_box.send_keys(ansCheck)
+
+            elem_push = browser.find_element(By.ID,'ans_submit')
+            elem_push.click()
+
+        try:
+            sleep(1)
+            elem_next_btn = browser.find_element(By.XPATH,'//input[@value=\'次の問題へ\']')
+            browser.execute_script('arguments[0].click();', elem_next_btn)
+            conn.commit()
+        except:
+            print("end")
+            print("==========================================================")
+            print("問題を選択したらEnterを押してください。終わる時はendを入力してください。")
+            flag = 0
+            break
+
 
     # ラジオボタン形式
     while flag == 1:
