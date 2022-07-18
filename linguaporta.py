@@ -41,6 +41,7 @@ while True:
     inputStr = input()
     if inputStr == "end":
         try:
+            conn.commit()
             conn.close()
         except:
             print("DB接続エラー")
@@ -54,14 +55,20 @@ while True:
     title_content = elem_title.text.split(' ')[1]
     tableName = ""
 
+    flag = 0
+
     if title_content == '多肢選択':
         tableName = f'Q{title_number}1'
+        flag = 1
     elif title_content == '単一選択':
         tableName = f'Q{title_number}2'
+        flag = 2
     elif title_content == '記述問題':
         tableName = f'Q{title_number}3'
+        flag = 3
     elif title_content == '記述問題':
         tableName = f'Q{title_number}4'
+        flag = 4
 
     # DB
     dbname = 'linguaporta.db'
@@ -76,8 +83,8 @@ while True:
     values = []
     questions = []
 
-    # ここから答えを取得
-    while True:
+    # ラジオボタン形式
+    while flag == 1:
         sleep(1)
 
         elem_question = browser.find_element(By.XPATH,'//*[@id="question_td"]/form[1]/b')
@@ -157,10 +164,11 @@ while True:
             print("end")
             print("==========================================================")
             print("問題を選択したらEnterを押してください。終わる時はendを入力してください。")
-
+            flag = 0
             break
+    
 
-    conn.commit()
+
 
 
 # elem_login_btn = browser.find_element(By.XPATH,'//*[@id="content-study"]/div[1]/div[3]/div[1]/div/input')
