@@ -205,23 +205,26 @@ while True:
             except:
                 print("no answer")
 
-            elem_box = browser.find_element(By.CLASS_NAME,'qu03')
-            value = elem_box.text
+            try:
+                elem_box = browser.find_element(By.CLASS_NAME,'qu03')
+                value = elem_box.text
+                elem_question = browser.find_element(By.XPATH,'//*[@id="question_td"]/form[1]/b')
+                question = int(elem_question.text.split('：')[1])
+                questions.append(question)
 
-            elem_question = browser.find_element(By.XPATH,'//*[@id="question_td"]/form[1]/b')
-            question = int(elem_question.text.split('：')[1])
-            questions.append(question)
+                print(type(question))
+                print(type(value))
 
-            print(type(question))
-            print(type(value))
+                cur.execute(f'INSERT INTO {tableName}(question , ans) values( ? , ? )', (question,value))
 
-            cur.execute(f'INSERT INTO {tableName}(question , ans) values( ? , ? )', (question,value))
-
-            # print(values)
-            # print(questions)
-            # 中身を全て取得するfetchall()を使って、printする。
-            cur.execute(f'SELECT * FROM {tableName}')
-            print(cur.fetchall())   
+                # print(values)
+                # print(questions)
+                # 中身を全て取得するfetchall()を使って、printする。
+                cur.execute(f'SELECT * FROM {tableName}')
+                print(cur.fetchall())   
+            except:
+                print("divで答えが囲まれてないです。もう一度読み取ってください")
+            
         else:
             cur.execute(f'select * from {tableName} where question == {question_};')
             ansChecks = cur.fetchall()[0][1].split(' ')
