@@ -77,12 +77,13 @@ while True:
     cur = conn.cursor()
 
     try:
-        cur.execute(f'CREATE TABLE {tableName}(question INTEGER PRIMARY KEY , ans STRING)')
+        cur.execute(f'CREATE TABLE {tableName}(question INTEGER PRIMARY KEY , ans STRING , problemStatement STRING)')
     except:
         print("もう既にDBは作られています。")
 
     values = []
     questions = []
+    problemStatements = []
 
     # ディスクテーション
     while flag == 4:
@@ -359,10 +360,14 @@ while True:
             question = int(elem_question.text.split('：')[1])
             questions.append(question)
 
+            elem_problem_statement = browser.find_element(By.XPATH,'//*[@id="qu02"]')
+            problemStatement = elem_problem_statement.text
+            problemStatements.append(elem_problem_statement.text)
+
             # print(type(question))
             # print(type(value))
 
-            cur.execute(f'INSERT INTO {tableName}(question , ans) values( {question} , \'{value}\' )')
+            cur.execute(f'INSERT INTO {tableName}(question , ans , problemStatement) values( {question} , \'{value}\' , \'{problemStatement}\' )')
 
             # print(values)
             # print(questions)
